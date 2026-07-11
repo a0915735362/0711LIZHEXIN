@@ -27,7 +27,7 @@ public class TestAll extends Command {
             );
         }
 
-        shooter.setShooterRPM(00);
+        shooter.setShooterRPM(5000);
 
         if (controller.getRightTriggerAxis() > 0.5) {
             shooter.setIntakeTrain(-0.7);

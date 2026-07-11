@@ -17,19 +17,13 @@ public final class ShooterLookup {
 
 
   private static final Point[] TABLE = new Point[] {
-      new Point(8.0, 3650.0, -0.40),
-      new Point(10.0, 3800.0, -0.44),
+      new Point(8.0, 3675.0, -0.40),
+      new Point(10.0, 3850.0, -0.44),
       new Point(12.0, 4000.0, -0.62),
       new Point(14.0, 4150.0, -0.67),
       new Point(16.0, 4400.0, -0.70)
   };
-  //  private static final Point[] TABLE = new Point[] {
-  //     new Point(8.0, 0, -0.20),
-  //     new Point(10.0, 0, -0.28),
-  //     new Point(12.0, 0, -0.36),
-  //     new Point(14.0, 0, -0.40),
-  //     new Point(16.0, 0, -0.44)
-  // };
+
 
   private ShooterLookup() {}
 

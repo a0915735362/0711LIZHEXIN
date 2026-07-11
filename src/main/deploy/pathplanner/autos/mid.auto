@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "1(back)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2(storage)"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "INTAKEOUT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ROLLER_START_OUT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3(intake)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "4(backtoaim)"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AUTOAIM"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AUTOSHOOT"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

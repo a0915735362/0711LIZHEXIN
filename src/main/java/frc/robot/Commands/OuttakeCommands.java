@@ -1,3 +1,4 @@
+
 package frc.robot.Commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,17 +19,22 @@ public class OuttakeCommands extends Command {
     @Override
     public void execute() {
         intake.outtake();           
+        
+        shooter.shooterTrainReverse();   
+        
         shooter.intakeReverse();   
     }
 
     @Override
     public void end(boolean interrupted) {
+
         intake.stopRoller();
-        shooter.stopTrain();
+        shooter.stopTrain(); 
     }
 
     @Override
     public boolean isFinished() {
+
         return false;
     }
 }

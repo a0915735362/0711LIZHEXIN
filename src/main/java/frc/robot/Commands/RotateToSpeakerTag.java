@@ -18,7 +18,6 @@ public class RotateToSpeakerTag extends Command {
 
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric();
 
-    // 🔧 直接寫死（因為 TunerConstants 沒有）
     private final SlewRateLimiter xLimiter = new SlewRateLimiter(3.0);
     private final SlewRateLimiter yLimiter = new SlewRateLimiter(3.0);
     private final SlewRateLimiter rotLimiter = new SlewRateLimiter(3.0);
@@ -69,11 +68,10 @@ public class RotateToSpeakerTag extends Command {
             rot = -controller.getRightX();
         }
 
-        // 🔧 從 TunerConstants 拿最大速度（要轉成 double）
+
         double maxSpeed =
             TunerConstants.kSpeedAt12Volts.in(edu.wpi.first.units.Units.MetersPerSecond);
 
-        // 🔧 角速度自己給（TunerConstants 沒有）
         double maxAngularSpeed = 3.0;
 
         xSpeed = xLimiter.calculate(xSpeed) * maxSpeed;

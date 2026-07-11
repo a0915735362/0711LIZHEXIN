@@ -1,3 +1,4 @@
+
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -21,18 +22,32 @@ import frc.robot.Constants.ConsShooter;
 
 public class Shooter extends SubsystemBase {
 
-    private final TalonFX flywheelMain = new TalonFX(ConsShooter.FLYWHEEL_MAIN_ID,ConsIntake.KcanBusName);
-    private final TalonFX flywheelFollower = new TalonFX(ConsShooter.FLYWHEEL_FOLLOWER_ID,ConsIntake.KcanBusName);
+    //TalonFX 
+    private final TalonFX flywheelMain =
+        new TalonFX(ConsShooter.FLYWHEEL_MAIN_ID, ConsIntake.KcanBusName);
 
-    private final SparkMax intakeTrain = new SparkMax(ConsShooter. INTAKE_TRAIN_ID, MotorType.kBrushless);
-    private final SparkMax shooterTrain = new SparkMax(ConsShooter.SHOOTER_TRAIN_ID, MotorType.kBrushless);
+    private final TalonFX flywheelFollower =
+        new TalonFX(ConsShooter.FLYWHEEL_FOLLOWER_ID, ConsIntake.KcanBusName);
 
-    private final SparkMax angle = new SparkMax(ConsShooter.ANGLE_ID, MotorType.kBrushless);
+    private final TalonFX shooterTrain =
+        new TalonFX(ConsShooter.SHOOTER_TRAIN_ID);
+
+    //SparkMAX
+    private final SparkMax intakeTrain =
+        new SparkMax(ConsShooter.INTAKE_TRAIN_ID, MotorType.kBrushless);
+
+    private final SparkMax angle =
+        new SparkMax(ConsShooter.ANGLE_ID, MotorType.kBrushless);
+
     private final RelativeEncoder angleEncoder = angle.getEncoder();
     private final SparkClosedLoopController anglePID = angle.getClosedLoopController();
 
+    //Control Requests
     private final VoltageOut flywheelVoltageReq = new VoltageOut(0);
-    private final VelocityVoltage flywheelVelocityReq = new VelocityVoltage(0).withSlot(0);
+    private final VelocityVoltage flywheelVelocityReq =
+        new VelocityVoltage(0).withSlot(0);
+
+    private final VoltageOut shooterTrainVoltageReq = new VoltageOut(0);
 
     public Shooter() {
 
@@ -54,6 +69,7 @@ public class Shooter extends SubsystemBase {
         angleEncoder.setPosition(0.0);
     }
 
+    //Flywheel
     public void setShooterRPM(double rpm) {
         double rps = rpm / 60.0;
         flywheelMain.setControl(flywheelVelocityReq.withVelocity(rps));
@@ -75,46 +91,61 @@ public class Shooter extends SubsystemBase {
         return flywheelMain.getVelocity().getValueAsDouble() * 60.0;
     }
 
+    //Intake 
     public void setIntakeTrain(double speed) {
         intakeTrain.set(MathUtil.clamp(speed, -1, 1));
     }
-//把球吸進來
+
     public void intakeForward() {
-        setIntakeTrain(-0.6);
+        setIntakeTrain(ConsShooter.INTAKE_FORWARD);
     }
-//吐出來j
+
     public void intakeReverse() {
-        setIntakeTrain(0.75);
+        setIntakeTrain(ConsShooter.INTAKE_REVERSE);
     }
 
     public void stopIntakeTrain() {
         setIntakeTrain(0);
     }
 
-    public void setShooterTrain(double speed) {
-        shooterTrain.set(MathUtil.clamp(speed, -1, 1));
+    //Shooter Train
+    public void setShooterTrain(double percent) {
+        percent = MathUtil.clamp(percent, -1.0, 1.0);
+        shooterTrain.setControl(
+            shooterTrainVoltageReq.withOutput(percent * 12.0)
+        );
     }
 
     public void shooterTrainForward() {
-        setShooterTrain(-0.85);
+        setShooterTrain(ConsShooter.SHOOTER_TRAIN_FORWARD);
     }
 
     public void shooterTrainReverse() {
-        setShooterTrain(0.7);
+        setShooterTrain(ConsShooter.SHOOTER_TRAIN_REVERSE);
     }
 
     public void stopShooterTrain() {
-        setShooterTrain(0);
+        shooterTrain.stopMotor();
+    }
+
+    // uptake
+    public void uptakeReverse() {
+        shooterTrain.setControl(
+            shooterTrainVoltageReq.withOutput(
+                ConsShooter.UPTAKE_REVERSE_VOLTAGE
+            )
+        );
     }
 
     public void feedForward() {
-        setIntakeTrain(0.6);
-        setShooterTrain(0.7);
+
+        setIntakeTrain(ConsShooter.FEED_INTAKE_FORWARD);
+        setShooterTrain(ConsShooter.FEED_SHOOTER_FORWARD);
     }
 
     public void feedReverse() {
-        setIntakeTrain(-0.7);
-        setShooterTrain(-0.8);
+        setIntakeTrain(ConsShooter.FEED_INTAKE_REVERSE);
+        setShooterTrain(ConsShooter.FEED_SHOOTER_REVERSE);
     }
 
     public void stopTrain() {

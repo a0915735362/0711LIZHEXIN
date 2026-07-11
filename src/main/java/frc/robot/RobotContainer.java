@@ -33,8 +33,11 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
-
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathConstraints; 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -42,16 +45,20 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants;
+
+
 
 public class RobotContainer {
+    
     private final CommandXboxController operator = new CommandXboxController(3);
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
- 
+    
     private final Intake intake = new Intake();
     private final Shooter shooter = new Shooter();
     private final LL4 LL4 = new LL4();
@@ -75,14 +82,17 @@ public class RobotContainer {
 
 
     public RobotContainer() {
-        autoChooser = AutoBuilder.buildAutoChooser("Tests");
-        SmartDashboard.putData("Auto Mode", autoChooser);
 
-        configureBindings();
+    drivetrain.setLimelight(LL4);
 
-         // Warmup PathPlanner to avoid Java pauses
-        CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
-    }
+    configureBindings();
+
+    autoChooser = AutoBuilder.buildAutoChooser("Tests");
+    SmartDashboard.putData("Auto Mode", autoChooser);
+
+    // Warmup PathPlanner to avoid Java pauses
+    CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+}
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -108,10 +118,15 @@ public class RobotContainer {
 
         joystick.rightTrigger().whileTrue(drivetrain.applyRequest(() -> brake));//煞車
 
-        // 按住手把 B 鈕：以左搖桿的方向指示各模組朝向（PointWheelsAt）。使用 new Rotation2d(-leftY, -leftX) 由向量分量建立方向角度。
         joystick.x().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
+
+        NamedCommands.registerCommand("INTAKEOUT", new IntakeExtendCommand(intake, 0.5));
+        NamedCommands.registerCommand("ROLLER_START_OUT", new IntakeRollerCommand(intake, true));
+        NamedCommands.registerCommand("AUTOSHOOT",new ProxyCommand(() -> new AutoShoot(shooter, LL4.getDistanceMeters())).withTimeout(5.0));
+        NamedCommands.registerCommand("AUTOAIM",new AutoAimSpeaker(drivetrain, LL4).withTimeout(1.2));
+
 
         // joystick.povUp().whileTrue(drivetrain.applyRequest(() ->
         //     forwardStraight.withVelocityX(0.5).withVelocityY(0))
@@ -140,11 +155,13 @@ public class RobotContainer {
         intake::stopRoller,
         intake)
     );
+    
+
         
     joystick.b().whileTrue(
-        new RotateToSpeakerTag(drivetrain, LL4, joystick.getHID())
+        new RotateToSpeakerTag(drivetrain, LL4, operator.getHID()
         
-    );
+    ));
    joystick.x().onTrue(
         new AutoAlignToTag(drivetrain, LL4)
     );
@@ -170,12 +187,31 @@ public class RobotContainer {
         operator.povDown()
             .whileTrue(new InstantCommand(() -> intake.retract(), intake))
             .onFalse(new InstantCommand(() -> intake.stopArm(), intake));
+
+        Pose2d targetPose = new Pose2d(3.0, 4.0, Rotation2d.fromDegrees(180));
+
+        PathConstraints constraints = new PathConstraints(
+            3.0, 
+            4.0, 
+            Units.degreesToRadians(540), 
+            Units.degreesToRadians(720)
+        );
+
+        joystick.leftBumper().whileTrue(
+            AutoBuilder.pathfindToPose(
+            targetPose,
+            constraints,
+        0.0
+    )
+);
+       
     }
 
-      
+     
     
 
     public Command getAutonomousCommand() {
+        
     return autoChooser.getSelected();
     
 }
